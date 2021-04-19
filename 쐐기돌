@@ -1,0 +1,65 @@
+function(_, event, value)
+    
+    function color(level)
+        if level >= 10 then
+            return select(4, GetItemQualityColor(4))
+        elseif level >= 7 then
+            return select(4, GetItemQualityColor(3))
+        elseif level >= 4 then
+            return select(4, GetItemQualityColor(2))
+        else
+            return select(4, GetItemQualityColor(1))
+        end
+    end
+    
+    aura_env.result1 = ""
+    local result = ""
+    local keymapid = C_MythicPlus.GetOwnedKeystoneChallengeMapID()
+    local keylevel = C_MythicPlus.GetOwnedKeystoneLevel()
+    local mapid = {
+        [375] = "티르너",
+        [376] = "죽상",
+        [377] = "저편",
+        [378] = "속죄",
+        [379] = "역병",
+        [380] = "핏빛",
+        [381] = "승천",
+        [382] = "투기장",
+    }
+    
+    if not keymapid or not keylevel then
+        result = "|cffffc800쐐기돌 없음|r"
+    else
+        result = "쐐기돌: |c" .. color(keylevel) .. mapid[keymapid] .. " (" .. keylevel .. ")|r"
+        local mlist = wipe(mlist or {})
+        local mlistcolor = wipe(mlistcolor or {})
+        local history = wipe(history or {})
+        history = C_MythicPlus.GetRunHistory(false, true)
+        if #history == 0 then
+            result = result .. ", " .. "|cffff5050주차 정보 없음|r"
+        else
+            for i = 1, #history do
+                local level = history[i].level
+                table.insert(mlist, level)
+            end
+            table.sort(mlist, function(a, b) return a > b end)
+            for i = #mlist, 1, -1 do
+                mlistcolor[i] = "|c" .. color(mlist[i]) .. mlist[i] .. "|r"
+                if i == 1 or i == 4 or i == 10 then
+                    mlist[i] = "|cffff0000" .. mlist[i] .. "|r"
+                elseif i > 10 then
+                    table.remove(mlist, i)
+                end
+            end
+            result = result .. " |cff909090/|r " .. "주차: " .. mlistcolor[1]
+            if event == "mythicinfo_mouseover" and value then
+                result = "세부정보: " .. table.concat(mlist, ", ")
+            end
+        end
+    end
+    
+    aura_env.result1 = result1
+    return true
+    
+end
+
