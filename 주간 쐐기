@@ -1,0 +1,81 @@
+function ()
+    local vaultIlv = {};
+    
+    vaultIlv[2] = 200;
+    vaultIlv[3] = 203;
+    vaultIlv[4] = 207;
+    vaultIlv[5] = 210;
+    vaultIlv[6] = 210;
+    vaultIlv[7] = 213;
+    vaultIlv[8] = 216;
+    vaultIlv[9] = 216;
+    vaultIlv[10] = 220;    
+    vaultIlv[11] = 220;
+    vaultIlv[12] = 223;
+    vaultIlv[13] = 223;
+    vaultIlv[14] = 226;    
+    vaultIlv[15] = 226;
+    
+    if not aura_env.lastRuns then
+        aura_env.lastRuns = -1;       
+        WeeklyRewards_LoadUI();
+    end
+    
+    local runHistory = C_MythicPlus.GetRunHistory(false, true);
+    local totalRuns = #runHistory;    
+    
+    if totalRuns == aura_env.lastRuns then
+        return aura_env.lastRunsText;
+    else
+        aura_env.lastRuns = totalRuns;
+    end   
+    
+    local result = "Total M+ runs this week : " .. totalRuns .. "\n\n";
+    
+    if totalRuns > 0 then        
+        local top = math.min(totalRuns,10);
+        
+        local comparison = function(entry1, entry2)
+            if ( entry1.level == entry2.level ) then
+                return entry1.mapChallengeModeID < entry2.mapChallengeModeID;
+            else
+                return entry1.level > entry2.level;
+            end
+        end
+        table.sort(runHistory, comparison);
+        
+        for index=1,top do       
+            local close = false;
+            local run = runHistory[index];
+            local name = C_ChallengeMode.GetMapUIInfo(run.mapChallengeModeID);
+            if index == 1 then
+                result = result .. "|cFFa335ee";     
+                close = true;
+            else 
+                if index == 4 then                
+                    result = result .. "|cFF0070dd";     
+                    close = true;
+                else
+                    if index == 10 then                
+                        result = result .. "|cFF1eff00";     
+                        close = true;
+                    end
+                    
+                end                 
+            end        
+            result = result .. "+" .. run.level .. " " .. name;
+            if close then 
+                local vaultLevel = math.min(run.level,15);
+                result = result .. " : " .. vaultIlv[vaultLevel] .. " ilevel |r";
+            end
+            result = result .. "\n";
+        end                
+    end
+    
+    aura_env.lastRunsText = result;
+    return result;
+end
+
+
+
+
